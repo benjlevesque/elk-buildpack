@@ -4,13 +4,7 @@ set -e
 
 [ "$BUILDPACK_DEBUG" = "true" ] && set -x
 
-cmnlib_url="https://raw.githubusercontent.com/Scalingo/buildpack-cmnlib/refs/heads/main/cmnlib.sh"
-
-if ! declare -F cmn::output::info >/dev/null; then
-    source /dev/stdin <<< \
-        "$( curl --silent --location --retry 3 "${cmnlib_url}" \
-        || printf "echo ' 🗙 Unable to load cmnlib, aborting.' >&2 && exit 1"; )"
-fi
+source "$( cd -P "$( dirname "${0}" )" && pwd )/../cmnlib.sh"
 
 cmn::main::start "${0}" "${1}" "${2}" "${3}"
 
