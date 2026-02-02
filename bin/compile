@@ -1,0 +1,82 @@
+#!/usr/bin/env bash
+
+set -e
+
+[ "$BUILDPACK_DEBUG" = "true" ] && set -x
+
+cmnlib_url="https://raw.githubusercontent.com/Scalingo/buildpack-cmnlib/refs/heads/main/cmnlib.sh"
+
+if ! declare -F cmn::output::info >/dev/null; then
+    source /dev/stdin <<< \
+        "$( curl --silent --location --retry 3 "${cmnlib_url}" \
+        || printf "echo ' 🗙 Unable to load cmnlib, aborting.' >&2 && exit 1"; )"
+fi
+
+cmn::main::start "${0}" "${1}" "${2}" "${3}"
+
+
+cmn::task::start "Copying configuration for Logstash"
+if ! cp -r "${build_dir}" "/logstash/"; then
+    cmn::task::fail
+    cmn::output::err  "Could not copy configuration files.";
+    exit 2
+fi
+cmn::task::finish
+
+cmn::task::start "Installing the Logstash Buildpack"
+
+bp_url="https://github.com/Scalingo/logstash-buildpack.git"
+bp_output=""
+
+if ! bp_output="$( cmn::bp::run "${bp_url}" \
+        "/logstash" "${cache_dir}" "${env_dir}" )"; then
+    cmn::task::fail
+    cmn::output::err <<- EOM
+        Failed to run logstash-buildpack.
+        Output:
+        ${bp_output}        
+EOM
+    exit 3
+fi
+cmn::task::finish
+cmn::output::info <<- EOM
+        Buildpack output :
+        "${bp_output}"
+EOM
+
+
+cmn::task::start "Copying configuration for Opensearch Dashboards"
+if ! cp -r "${build_dir}" "/opensearch-dashboards/"; then
+    cmn::task::fail
+    cmn::output::err  "Could not copy configuration files.";
+    exit 4
+fi
+cmn::task::finish
+
+
+cmn::task::start "Installing the Opensearch Dashboards Buildpack"
+
+bp_url="https://github.com/Scalingo/opensearch-dashboards-buildpack.git"
+bp_output=""
+
+if ! bp_output="$( cmn::bp::run "${bp_url}" \
+        "/opensearch-dashboards" "${cache_dir}" "${env_dir}" )"; then
+    cmn::task::fail
+    cmn::output::err <<- EOM
+        Failed to run opensearch-dashboards-buildpack.
+        Output:
+        ${bp_output}        
+EOM
+    exit 5
+fi
+cmn::task::finish
+cmn::output::info <<- EOM
+        Buildpack output :
+        "${bp_output}"
+EOM
+
+
+
+
+
+cmn::main::finish

@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+cat << EOF
+---
+default_process_types:
+  web: /opensearch-dashboards/bin/opensearch-dashboards
+  logstash: /logstash/bin/logstash -f logstash.conf
+EOF
