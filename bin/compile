@@ -10,7 +10,7 @@ cmn::main::start "${0}" "${1}" "${2}" "${3}"
 
 
 cmn::task::start "Copying configuration for Logstash"
-if ! cp -r "${build_dir}" "/logstash/"; then
+if ! cp -r "${build_dir}" "${build_dir}/logstash/"; then
     cmn::task::fail
     cmn::output::err  "Could not copy configuration files.";
     exit 2
@@ -23,7 +23,7 @@ bp_url="https://github.com/Scalingo/logstash-buildpack.git"
 bp_output=""
 
 if ! bp_output="$( cmn::bp::run "${bp_url}" \
-        "/logstash" "${cache_dir}" "${env_dir}" )"; then
+        "${build_dir}/logstash" "${cache_dir}" "${env_dir}" )"; then
     cmn::task::fail
     cmn::output::err <<- EOM
         Failed to run logstash-buildpack.
@@ -40,7 +40,7 @@ EOM
 
 
 cmn::task::start "Copying configuration for Opensearch Dashboards"
-if ! cp -r "${build_dir}" "/opensearch-dashboards/"; then
+if ! cp -r "${build_dir}" "${build_dir}/opensearch-dashboards/"; then
     cmn::task::fail
     cmn::output::err  "Could not copy configuration files.";
     exit 4
@@ -54,7 +54,7 @@ bp_url="https://github.com/Scalingo/opensearch-dashboards-buildpack.git"
 bp_output=""
 
 if ! bp_output="$( cmn::bp::run "${bp_url}" \
-        "/opensearch-dashboards" "${cache_dir}" "${env_dir}" )"; then
+        "${build_dir}/opensearch-dashboards" "${cache_dir}" "${env_dir}" )"; then
     cmn::task::fail
     cmn::output::err <<- EOM
         Failed to run opensearch-dashboards-buildpack.
